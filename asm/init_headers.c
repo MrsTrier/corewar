@@ -17,9 +17,9 @@ unsigned int		calc_progsize(t_token *token)
 	return (weight);
 }
 
-void				init_headers(header_t **header, t_token *token, t_token_sec *info)//name, comment
+void    init_headers(header_t **header, t_token *token, t_token_sec *info)//name, comment
 {
-	int	com_len;
+	int				com_len;
 
 	com_len = ft_strlen(info->chmp_comment);
     (*header) = (header_t*)ml_malloc(sizeof(header_t), ML_HEADER);

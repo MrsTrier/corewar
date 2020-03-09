@@ -15,6 +15,7 @@
 
 #define ML_CHECK_LST 3
 # define ML_HEADER 4
+# define ML_FILE_NAME 9
 # define ML_CMD_NUM 7
 
 #define MAX_FILE_LENGTH (CHAMP_MAX_SIZE + PROG_NAME_LENGTH + COMMENT_LENGTH + 16)
@@ -31,8 +32,6 @@ typedef struct		s_token_sec
 	_Bool			arg;
 	_Bool			separator;
 	_Bool			new_line;
-	_Bool			new_line_name;
-	_Bool			new_line_comment;
 	char			*chmp_name;
 	char 			*chmp_comment;
 }					t_token_sec;
@@ -44,6 +43,7 @@ u_int32_t			command_length(t_token *token);
 void			    print_commands(int fd, t_token *token);
 
 void				label_substitution(t_label *head);
+void				print_in_file(char *file_name, t_token *token, header_t *header);
 
 void				print_header(int fd, header_t *header);
 void				if_label(t_token *token, t_token_sec **check_list);

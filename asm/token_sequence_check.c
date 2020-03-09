@@ -37,22 +37,31 @@ void	if_str_check(t_token *token, t_token_sec **check_list)
 		if (!is_length_within_limit((char *)token->content, check_list))
 			token_exit((((*check_list)->name && !(*check_list)->comment_prog) ?
 						ASM_TOLONG_NAME : ASM_TOLONG_COMMENT), token);
-		if (((*check_list)->name && !(*check_list)->str_name) ||
-			((*check_list)->name && ((*check_list)->comment_prog &&
-									(*check_list)->str_comment)))
+		if (((*check_list)->name && !(*check_list)->comment_prog) ||
+			((*check_list)->name && (*check_list)->comment_prog &&
+									(*check_list)->str_comment))
 		{
+			((char *)token->content)[ft_strlen((char *)token->content) - 1] = '\0';
 			(*check_list)->str_name = true;
 			(*check_list)->new_line = false;
-			(*check_list)->chmp_name = ft_strsub((char *)token->content, 1,
-									ft_strlen((char *)token->content) - 2);
+			if ((*check_list)->str_name)
+				(*check_list)->chmp_name = ft_strjoin((*check_list)->chmp_name,
+				                                         ((char *)token->content + 1));
+			else
+				(*check_list)->chmp_name = ((char *)token->content + 1);
 		}
 		else if (((*check_list)->comment_prog && ((*check_list)->name &&
 					(*check_list)->str_name) && !(*check_list)->label) ||
 					(!((*check_list)->name && (*check_list)->str_name) && (*check_list)->comment_prog))
 		{
+			((char *)token->content)[ft_strlen((char *)token->content) - 1] = '\0';
 			(*check_list)->str_comment = true;
 			(*check_list)->new_line = false;
-			(*check_list)->chmp_comment = (char *)token->content;
+			if ((*check_list)->str_comment)
+				(*check_list)->chmp_comment = ft_strjoin((*check_list)->chmp_comment,
+				                                         ((char *)token->content + 1));
+			else
+				(*check_list)->chmp_comment = ((char *)token->content + 1);
 		}
 		else
 			token_exit(ASM_FILE_ERR, token);
@@ -80,7 +89,6 @@ void	if_command(t_token *token, t_token_sec **check_list)
 			while (!ft_strequ(com_name, g_op[i].name))
 				i++;
 			token->content = (void*)ml_malloc(sizeof(u_int8_t), ML_CMD_NUM);
-//			token->content = (u_int8_t*)g_op[i].code;
 			token->content = (void*)&g_op[i].code;
 			command_check(token);
 		}
@@ -96,7 +104,10 @@ _Bool			token_sequence(t_token *token, t_token_sec	**check_list)
 	while (token != NULL)
 	{
 		if (token->type == COMMENT)
-			;
+		{
+			(*check_list)->new_line = false;
+			(*check_list)->comment = true;
+		}
 		else if (token->type == SEPARATOR)
 		{
 			if ((*check_list)->separator)
