@@ -17,7 +17,7 @@ char		*parse_file_name(char *file_path)
 	return (name);
 }
 
-char	*open_files(char *file_name, t_token_sec **check_list,
+char	*open_files(char *file_name, t_token_sec *check_list,
 		t_token **token)
 {
 	int	fd;
@@ -38,19 +38,18 @@ char	*open_files(char *file_name, t_token_sec **check_list,
 int main(int ac, char **av)
 {
 	t_token		*token;
-	header_t	*header;
-	t_token_sec	*check_list;
+	header_t	header;
+	t_token_sec	check_list;
 	int			i;
 	char        *file_tofill;
 
 	i = 1;
 	token = NULL;
-	header = NULL;
 	while (i < ac)
 	{
 		file_tofill = open_files(av[i], &check_list, &token);
-		init_headers(&header, token, check_list);
-		print_in_file(file_tofill, token, header);
+		init_headers(&header, token, &check_list);
+		print_in_file(file_tofill, token, &header);
 		i++;
 	}
 

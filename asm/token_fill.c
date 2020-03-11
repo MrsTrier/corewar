@@ -14,15 +14,23 @@
 #include "asm.h"
 #include "libword.h"
 
+_Bool	is_numarg(char *str)
+{
+	if (*str == '-')
+		str++;
+	return (ft_isdigitalword(str, DELIMITERS));
+}
+
 _Bool	arg_label_recognition(char *str, t_token *token, t_label **tail)
 {
-	if (*str == REGISTER_CHAR && ft_isdigitalword(str + 1, DELIMITERS))
+	if (*str == REGISTER_CHAR && is_numarg(str + 1)/*ft_isdigitalword(str + 1, DELIMITERS)*/)
 		token->content = (void*)add_arg(str, T_REG);
-	else if (*str == DIRECT_CHAR && ft_isdigitalword(str + 1, DELIMITERS))
+	else if (*str == DIRECT_CHAR && is_numarg(str + 1)/*ft_isdigitalword(str + 1, DELIMITERS)*/)
 		token->content = (void*)add_arg(str, T_DIR);
-	else if (ft_isdigitalword(str, DELIMITERS))
-		token->content = (void*)add_arg(str, T_IND); ///опустить ниже как более медленную
-	else if ((*str == DIRECT_CHAR && *(str + 1) == LABEL_CHAR) || *str == LABEL_CHAR)
+	else if (is_numarg(str)/*ft_isdigitalword(str, DELIMITERS)*/)
+		token->content = (void*)add_arg(str, T_IND);
+	else if ((*str == DIRECT_CHAR && *(str + 1) == LABEL_CHAR) ||
+	         *str == LABEL_CHAR)
 	{
 		if (*str == LABEL_CHAR)
 			add_label(str + 1, token, tail, T_IND | T_LAB);
@@ -33,7 +41,7 @@ _Bool	arg_label_recognition(char *str, t_token *token, t_label **tail)
 	}
 	else
 		return (0);
-    token->type = ARGUMENT;
+	token->type = ARGUMENT;
 	return (1);
 }
 
@@ -54,27 +62,11 @@ _Bool	label_recognition(char *str, t_token *token, t_label **tail)
 	return (1);
 }
 
-_Bool	is_not_closed_sting(t_token *token)
-{
-	char *prestr;
-	if (!(token->prev && token->prev->prev && token->prev->prev->type == STRING))
-		return (0);
-	prestr = (char*)token->prev->prev->content;
-	while (*prestr && *prestr != '"')
-		prestr++;
-	if (*prestr == '"')
-		return (0);
-	return (1);
-}
-
 void	token_fill(char *str, t_token *token, t_label **tail, u_int8_t flag)
 {
-	static int i;
-	i++;
-	if (i == 11)
-		i = i;
-
-	if (flag == ENDFILE)
+	if (*str == '"' || flag == NOTENDSTR)
+		add_string(str, token);
+	else if (flag == ENDFILE)
 		token->type = END;
 	else if (!*str || flag == ENDLINE)
 		token->type = NEW_LINE;
@@ -82,8 +74,6 @@ void	token_fill(char *str, t_token *token, t_label **tail, u_int8_t flag)
 		token->type = SEPARATOR;
 	else if (*str == COMMENT_CHAR || *str == ALT_COMMENT_CHAR)
 		token->type = COMMENT;
-	else if (*str == '"' || flag == NOTENDSTR)
-		add_string(str, token);
 	else if (*str == '.' && ft_wordequ(NAME_CMD_STRING, str, DELIMITERS))
 		token->type = NAME;
 	else if (*str == '.' && ft_wordequ(COMMENT_CMD_STRING, str, DELIMITERS))
@@ -96,6 +86,6 @@ void	token_fill(char *str, t_token *token, t_label **tail, u_int8_t flag)
 	{
 		token->type = COMMAND;
 		token->content = (void*)ml_strndup(str,
-				ft_skipword(str, DELIMITERS) - str, ML_T_CONTENT); //или без -1
+		                                   ft_skipword(str, DELIMITERS) - str, ML_CMD_NAME);
 	}
 }
